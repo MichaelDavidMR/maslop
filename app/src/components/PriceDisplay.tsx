@@ -10,7 +10,6 @@
  */
 
 import type { Product, Currency } from '@/types';
-import { MessageCircle } from 'lucide-react';
 
 const WA_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER ?? '18095206178';
 
@@ -68,7 +67,6 @@ export function PriceDisplay({
       );
     }
 
-    // card (default)
     return (
       <span className={`font-black text-white text-lg leading-none ${className}`}>
         {formatPrice(product.price, product.price_usd, currency)}
@@ -114,7 +112,6 @@ export function PriceDisplay({
     );
   }
 
-  // card (default)
   return (
     <a
       href={waUrl}
@@ -129,7 +126,7 @@ export function PriceDisplay({
   );
 }
 
-// ── Tiny inline WhatsApp SVG (avoids lucide-react weight for this icon) ──────
+// ── Tiny inline WhatsApp SVG ────────────────────────────────────────────────
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -143,7 +140,7 @@ function WhatsAppIcon({ className }: { className?: string }) {
   );
 }
 
-// ── Utility (use anywhere you need the formatted price string) ────────────────
+// ── Utility ─────────────────────────────────────────────────────────────────
 export function getPriceLabel(product: Product, currency: Currency): string {
   if (product.price_hidden) return 'Consultar precio';
   return formatPrice(product.price, product.price_usd, currency);

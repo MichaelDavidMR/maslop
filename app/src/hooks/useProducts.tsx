@@ -1,9 +1,13 @@
-// UserProducts.tsx
 import { useState, useCallback, useEffect, useRef } from 'react';
 import type { Product } from '@/types';
 import { PRODUCTS_DATA } from '@/types';
 import { supabase, uploadProductImage, deleteProductImage } from '@/lib/supabase';
 import { toast } from 'sonner';
+
+type ProductRow = Product & {
+  created_at?: string;
+  updated_at?: string;
+};
 
 export function useProducts() {
   // Start with seed data so UI isn't blank during first fetch
@@ -12,9 +16,11 @@ export function useProducts() {
   const [error, setError] = useState<string | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
+  const db = supabase as any;
+
   // ── Fetch all products ───────────────────────────────────────
   const fetchProducts = useCallback(async () => {
-    const { data, error: fetchErr } = await supabase
+    const { data, error: fetchErr } = await db
       .from('products')
       .select('*')
       .order('created_at', { ascending: false });
@@ -28,7 +34,7 @@ export function useProducts() {
     }
 
     setLoading(false);
-  }, []);
+  }, [db]);
 
   // ── Mount: fetch + subscribe to realtime changes ─────────────
   useEffect(() => {
@@ -44,10 +50,10 @@ export function useProducts() {
             setProducts((prev) => [payload.new as Product, ...prev]);
           } else if (payload.eventType === 'UPDATE') {
             setProducts((prev) =>
-              prev.map((p) => (p.id === payload.new.id ? (payload.new as Product) : p))
+              prev.map((p) => (p.id === (payload.new as ProductRow).id ? (payload.new as Product) : p))
             );
           } else if (payload.eventType === 'DELETE') {
-            setProducts((prev) => prev.filter((p) => p.id !== payload.old.id));
+            setProducts((prev) => prev.filter((p) => p.id !== (payload.old as ProductRow).id));
           }
         }
       )
@@ -135,7 +141,7 @@ export function useProducts() {
         }
       }
 
-      const { data, error: insertErr } = await supabase
+      const { data, error: insertErr } = await db
         .from('products')
         .insert({ ...productData, image })
         .select()
@@ -150,7 +156,7 @@ export function useProducts() {
       toast.success('Producto creado exitosamente');
       return data as Product;
     },
-    []
+    [db]
   );
 
   // ── Update ────────────────────────────────────────────────────
@@ -165,7 +171,6 @@ export function useProducts() {
       if (imageFile) {
         try {
           image = await uploadProductImage(imageFile);
-          // Delete old image if it was from Storage
           const old = products.find((p) => p.id === id);
           if (old?.image) await deleteProductImage(old.image);
         } catch (e) {
@@ -174,7 +179,7 @@ export function useProducts() {
         }
       }
 
-      const { data, error: updateErr } = await supabase
+      const { data, error: updateErr } = await db
         .from('products')
         .update({ ...updates, ...(image ? { image } : {}), updated_at: new Date().toISOString() })
         .eq('id', id)
@@ -190,7 +195,7 @@ export function useProducts() {
       toast.success('Producto actualizado');
       return data as Product;
     },
-    [products]
+    [products, db]
   );
 
   // ── Delete ────────────────────────────────────────────────────
@@ -198,25 +203,24 @@ export function useProducts() {
     async (id: string): Promise<boolean> => {
       const target = products.find((p) => p.id === id);
 
-      const { error: deleteErr } = await supabase.from('products').delete().eq('id', id);
+      const { error: deleteErr } = await db.from('products').delete().eq('id', id);
 
       if (deleteErr) {
         toast.error('Error al eliminar producto');
         return false;
       }
 
-      // Clean up storage image
       if (target?.image) await deleteProductImage(target.image);
 
       toast.success('Producto eliminado');
       return true;
     },
-    [products]
+    [products, db]
   );
 
   // ── Update stock only ─────────────────────────────────────────
   const updateStock = useCallback(async (id: string, newStock: number): Promise<boolean> => {
-    const { error: updateErr } = await supabase
+    const { error: updateErr } = await db
       .from('products')
       .update({ stock: newStock, available: newStock > 0 })
       .eq('id', id);
@@ -226,7 +230,7 @@ export function useProducts() {
       return false;
     }
     return true;
-  }, []);
+  }, [db]);
 
   return {
     products,

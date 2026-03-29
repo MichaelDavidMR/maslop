@@ -21,6 +21,13 @@ interface AuthContextType {
   loading: boolean;
 }
 
+interface ProfileRow {
+  id: string;
+  email: string;
+  name: string | null;
+  role: string | null;
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -38,18 +45,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     setSession(supabaseSession);
 
-    const { data: profile, error } = await supabase
+    const db = supabase as any;
+
+    const { data: profile, error } = await db
       .from('profiles')
       .select('id, email, name, role')
       .eq('id', supabaseSession.user.id)
       .maybeSingle();
 
-    if (profile) {
+    const typedProfile = profile as ProfileRow | null;
+
+    if (typedProfile) {
       setUser({
-        id: profile.id,
-        email: profile.email,
-        name: profile.name ?? profile.email.split('@')[0],
-        role: profile.role,
+        id: typedProfile.id,
+        email: typedProfile.email,
+        name: typedProfile.name ?? typedProfile.email.split('@')[0],
+        role: typedProfile.role ?? 'user',
       });
     } else {
       console.warn('Profile not found', supabaseSession.user.id, error);
@@ -70,7 +81,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, s) => { loadProfile(s); }
+      (_event, s) => {
+        loadProfile(s);
+      }
     );
 
     return () => subscription.unsubscribe();
@@ -87,26 +100,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return false;
     }
 
-    // KEY FIX: set the session explicitly before querying so RLS auth.uid() resolves
     await supabase.auth.setSession({
       access_token: data.session.access_token,
       refresh_token: data.session.refresh_token,
     });
 
-    const { data: profile } = await supabase
+    const db = supabase as any;
+
+    const { data: profile } = await db
       .from('profiles')
       .select('role, name')
       .eq('id', data.user.id)
       .maybeSingle();
 
-    if (!profile || profile.role !== 'admin') {
+    const typedProfile = profile as { role?: string | null; name?: string | null } | null;
+
+    if (!typedProfile || typedProfile.role !== 'admin') {
       await supabase.auth.signOut();
       toast.error('No tienes permisos de administrador');
       setLoading(false);
       return false;
     }
 
-    toast.success(`Bienvenido, ${profile.name ?? 'Administrador'}`);
+    toast.success(`Bienvenido, ${typedProfile.name ?? 'Administrador'}`);
     setLoading(false);
     return true;
   }, []);
