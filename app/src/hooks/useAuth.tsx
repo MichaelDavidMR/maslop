@@ -25,7 +25,7 @@ interface ProfileRow {
   id: string;
   email: string;
   name: string | null;
-  role: string | null;
+  role: 'admin' | 'user' | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -56,11 +56,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const typedProfile = profile as ProfileRow | null;
 
     if (typedProfile) {
+      const normalizedRole: User['role'] =
+        typedProfile.role === 'admin' ? 'admin' : 'user';
+
       setUser({
         id: typedProfile.id,
         email: typedProfile.email,
         name: typedProfile.name ?? typedProfile.email.split('@')[0],
-        role: typedProfile.role ?? 'user',
+        role: normalizedRole,
       });
     } else {
       console.warn('Profile not found', supabaseSession.user.id, error);
@@ -80,11 +83,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loadProfile(s);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, s) => {
-        loadProfile(s);
-      }
-    );
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, s) => {
+      loadProfile(s);
+    });
 
     return () => subscription.unsubscribe();
   }, [loadProfile]);
@@ -113,7 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq('id', data.user.id)
       .maybeSingle();
 
-    const typedProfile = profile as { role?: string | null; name?: string | null } | null;
+    const typedProfile = profile as { role?: 'admin' | 'user' | null; name?: string | null } | null;
 
     if (!typedProfile || typedProfile.role !== 'admin') {
       await supabase.auth.signOut();
