@@ -1,5 +1,5 @@
 // Contact.tsx - Enhanced
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -18,10 +18,16 @@ import {
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
+const smoothEase = [0.22, 1, 0.36, 1] as const;
+
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 24 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] },
+  transition: {
+    duration: 0.6,
+    delay,
+    ease: smoothEase,
+  },
 });
 
 export function Contact() {
@@ -29,7 +35,7 @@ export function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     await new Promise((r) => setTimeout(r, 1500));
@@ -82,9 +88,8 @@ export function Contact() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#06090f] pt-28 pb-16">
+    <div className="min-h-screen bg-[#06090f] pt-28 pb-16 relative">
       <div className="absolute inset-0 bg-grid pointer-events-none" />
-      {/* Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full bg-blue-600/6 blur-[120px] pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -102,7 +107,7 @@ export function Contact() {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Left: Form */}
           <motion.div {...fadeUp(0.1)}>
-            <div className="glass-strong rounded-2xl border border-white/[0.07] overflow-hidden">
+            <div className="glass-strong rounded-2xl border border-white/[0.07] overflow-hidden relative">
               <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
               <div className="p-7 sm:p-8">
                 <h2 className="text-xl font-black text-white tracking-tight mb-7">
@@ -157,7 +162,7 @@ export function Contact() {
                         type="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        placeholder=".Massielopez_10@hotmail.com"
+                        placeholder="Massielopez_10@hotmail.com"
                         required
                         className="bg-slate-900/80 border-slate-700/60 text-white placeholder:text-slate-600 rounded-xl h-10 focus:border-blue-500/60 transition-all"
                       />
@@ -235,7 +240,10 @@ export function Contact() {
                   href={info.href}
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 + i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{
+                    delay: 0.3 + i * 0.07,
+                    ease: smoothEase,
+                  }}
                   className={`group block p-5 glass-strong rounded-2xl border border-white/[0.06] ${info.border} transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5`}
                 >
                   <div className={`w-10 h-10 rounded-xl ${info.bg} flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110`}>
