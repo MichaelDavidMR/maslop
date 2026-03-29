@@ -20,10 +20,12 @@ import {
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 
+const smoothEase = [0.22, 1, 0.36, 1] as const;
+
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 28 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] },
+  transition: { duration: 0.6, delay, ease: smoothEase },
 });
 
 export function Home() {
@@ -39,17 +41,17 @@ export function Home() {
       : featuredProducts.filter((p) => p.category === selectedCategory);
 
   const features = [
-    { icon: Truck,       title: 'Envío Gratis',    description: 'En compras mayores a RD$ 5,000', color: 'text-blue-400',    bg: 'bg-blue-500/10'    },
-    { icon: Shield,      title: 'Garantía',         description: 'Todos nuestros productos',        color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-    { icon: Headphones,  title: 'Soporte 24/7',     description: 'Atención personalizada',          color: 'text-amber-400',   bg: 'bg-amber-500/10'   },
-    { icon: Package,     title: 'Stock Real',        description: 'Disponibilidad inmediata',        color: 'text-purple-400',  bg: 'bg-purple-500/10'  },
+    { icon: Truck, title: 'Envío Gratis', description: 'En compras mayores a RD$ 5,000', color: 'text-blue-400', bg: 'bg-blue-500/10' },
+    { icon: Shield, title: 'Garantía', description: 'Todos nuestros productos', color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+    { icon: Headphones, title: 'Soporte 24/7', description: 'Atención personalizada', color: 'text-amber-400', bg: 'bg-amber-500/10' },
+    { icon: Package, title: 'Stock Real', description: 'Disponibilidad inmediata', color: 'text-purple-400', bg: 'bg-purple-500/10' },
   ];
 
   const stats = [
-    { value: `${products.length || '500'}+`, label: 'Productos',   icon: Package    },
-    { value: '10+',                           label: 'Categorías',  icon: Star       },
-    { value: '1000+',                         label: 'Clientes',    icon: Headphones },
-    { value: '5+',                            label: 'Años exp.',   icon: Zap        },
+    { value: `${products.length || '500'}+`, label: 'Productos', icon: Package },
+    { value: '10+', label: 'Categorías', icon: Star },
+    { value: '1000+', label: 'Clientes', icon: Headphones },
+    { value: '5+', label: 'Años exp.', icon: Zap },
   ];
 
   return (
@@ -123,7 +125,7 @@ export function Home() {
             <motion.div
               initial={{ opacity: 0, x: 40 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.8, delay: 0.3, ease: smoothEase }}
               className="relative hidden lg:block"
             >
               <div className="relative">
@@ -349,7 +351,7 @@ export function Home() {
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.7, ease: smoothEase }}
             className="relative rounded-2xl overflow-hidden"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900" />

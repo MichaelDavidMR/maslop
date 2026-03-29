@@ -263,13 +263,13 @@ export function Contact() {
                     ),
                   },
                   {
-                    href: '#',
+                    href: 'https://www.facebook.com/massiellopez',
                     label: 'Facebook',
                     hover: 'hover:bg-blue-600',
                     icon: <Facebook className="w-5 h-5" />,
                   },
                   {
-                    href: '#',
+                    href: 'https://www.instagram.com/massiellopez',
                     label: 'Instagram',
                     hover: 'hover:bg-gradient-to-br hover:from-pink-500 hover:to-purple-600',
                     icon: <Instagram className="w-5 h-5" />,

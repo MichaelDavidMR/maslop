@@ -8,11 +8,13 @@ import { useProducts } from '@/hooks/useProducts';
 import { PriceDisplay } from '@/components/PriceDisplay';
 import { CATEGORIES } from '@/types';
 import {
-  ShoppingCart, ArrowLeft, Check, Package, Shield, Truck,
+  ShoppingCart, ArrowLeft, Package, Shield, Truck,
   Minus, Plus, Share2, Heart, ChevronRight,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+
+const smoothEase = [0.22, 1, 0.36, 1] as const;
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 20 },
@@ -20,7 +22,7 @@ const fadeUp = (delay = 0) => ({
   transition: {
     duration: 0.5,
     delay,
-    ease: [0.22, 1, 0.36, 1] as const
+    ease: smoothEase,
   },
 });
 
@@ -32,8 +34,14 @@ export function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
-  useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [id]);
-  useEffect(() => { setQuantity(1); setIsWishlisted(false); }, [id]);
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [id]);
+
+  useEffect(() => {
+    setQuantity(1);
+    setIsWishlisted(false);
+  }, [id]);
 
   const product = products.find((p) => p.id === id);
   const category = product ? CATEGORIES.find((c) => c.slug === product.category) : undefined;
@@ -41,7 +49,9 @@ export function ProductDetail() {
     .filter((p) => product && p.category === product.category && p.id !== product.id)
     .slice(0, 4);
 
-  const handleAddToCart = () => { if (product) addToCart(product, quantity); };
+  const handleAddToCart = () => {
+    if (product) addToCart(product, quantity);
+  };
 
   const handleShare = () => {
     if (navigator.share) {
@@ -96,7 +106,10 @@ export function ProductDetail() {
           {category && (
             <>
               <ChevronRight className="w-3.5 h-3.5" />
-              <Link to={`/catalogo?category=${category.slug}`} className="hover:text-slate-300 transition-colors capitalize">
+              <Link
+                to={`/catalogo?category=${category.slug}`}
+                className="hover:text-slate-300 transition-colors capitalize"
+              >
                 {category.name}
               </Link>
             </>
@@ -215,7 +228,7 @@ export function ProductDetail() {
               {[
                 { icon: Shield, label: 'Producto verificado' },
                 { icon: Package, label: 'Disponible en tienda' },
-                { icon: Truck,  label: 'Envío a todo el país' },
+                { icon: Truck, label: 'Envío a todo el país' },
               ].map(({ icon: Icon, label }) => (
                 <div key={label} className="flex flex-col items-center gap-1.5 text-center">
                   <div className="w-8 h-8 rounded-lg bg-slate-800/80 border border-white/[0.06] flex items-center justify-center">
@@ -232,7 +245,10 @@ export function ProductDetail() {
         <motion.div {...fadeUp(0.2)} className="mt-14">
           <Tabs defaultValue="description">
             <TabsList className="bg-slate-900/60 border border-white/[0.06] rounded-xl p-1 h-auto mb-6">
-              <TabsTrigger value="description" className="rounded-lg px-5 py-1.5 text-sm font-medium data-[state=active]:bg-slate-800 data-[state=active]:text-white text-slate-500">
+              <TabsTrigger
+                value="description"
+                className="rounded-lg px-5 py-1.5 text-sm font-medium data-[state=active]:bg-slate-800 data-[state=active]:text-white text-slate-500"
+              >
                 Descripción
               </TabsTrigger>
             </TabsList>
